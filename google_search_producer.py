@@ -86,5 +86,10 @@ if __name__ == '__main__':
             'query_url': final_url
         }
         google_queue.send_message(MessageBody=json.dumps(google_subquery))
+        c.execute("""insert into google_search_subquery
+                     (query_alias, query_date, query_url)
+                     values (%s, %s, %s) ON CONFLICT DO NOTHING""",
+                  (google_query['query_alias'], google_query['query_date'], final_url))
 
+    conn.commit()
     conn.close()
