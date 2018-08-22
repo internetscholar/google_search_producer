@@ -26,7 +26,7 @@ if __name__ == '__main__':
         region_name=aws_credential['region_name']
     )
     sqs = aws_session.resource('sqs')
-    google_queue = sqs.get_queue_by_name(QueueName='google')
+    google_queue = sqs.get_queue_by_name(QueueName='google_search')
     google_queue.purge()
 
     c.execute("""select
@@ -36,20 +36,22 @@ if __name__ == '__main__':
                      *
                      , generate_series(initial_date::timestamp, final_date::timestamp, '1 day')::date as query_date
                    from
-                     google_search) as google_dates
+                     google_search_query) as google_dates, project
                 where
-                  not exists (select
+                  project.project_name = google_dates.project_name
+                  and project.active
+                  and not exists (select
                                 *
                               from
-                                google_subquery
+                                google_search_attempt
                               where
-                                google_subquery.query_date = google_dates.query_date
-                                and google_subquery.success
-                                and google_dates.query_alias = google_subquery.query_alias)""")
+                                google_dates.query_alias = google_search_attempt.query_alias
+                                and google_search_attempt.query_date = google_dates.query_date
+                                and google_search_attempt.success)""")
     google_queries = c.fetchall()
     for google_query in google_queries:
         parameters = dict()
-        parameters['q'] = google_query['query']
+        parameters['q'] = google_query['search_terms']
         # set language and country of search results (https://sites.google.com/site/tomihasa/google-language-codes)
         if google_query['language_results'] is not None:
             parameters['lr'] = google_query['language_results']
