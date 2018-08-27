@@ -12,7 +12,7 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
     conn = psycopg2.connect(host=config['database']['host'],
-                            dbname=config['database']['dbname'],
+                            dbname=config['database']['db_name'],
                             user=config['database']['user'],
                             password=config['database']['password'])
     c = conn.cursor(cursor_factory=extras.RealDictCursor)
@@ -70,7 +70,7 @@ if __name__ == '__main__':
         parameters['num'] = '100'
         # show omitted results
         parameters['filter'] = '0'
-        # disable autocorrect
+        # disable auto correct
         parameters['nfpr'] = '1'
         # encode parameters and assemble URL
         encoded_parameters = urlencode(parameters, quote_via=quote_plus)
