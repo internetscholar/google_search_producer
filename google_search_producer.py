@@ -27,7 +27,7 @@ def main():
             aws_session = boto3.Session(
                 aws_access_key_id=aws_credential['aws_access_key_id'],
                 aws_secret_access_key=aws_credential['aws_secret_access_key'],
-                region_name=aws_credential['region_name']
+                region_name=config['aws']['region_queues']
             )
             sqs = aws_session.resource('sqs')
             google_queue = sqs.get_queue_by_name(QueueName='google_search')
